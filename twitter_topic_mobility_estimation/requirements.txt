@@ -1,0 +1,10 @@
+mecab-python3
+PyMySql
+sqlalchemy
+numpy
+gensim
+scikit-learn
+pandas
+plotly
+geopy
+matplotlib

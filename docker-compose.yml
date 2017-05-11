@@ -1,0 +1,9 @@
+version: '2'
+services:
+  twitter_topic_mobility_prediction:
+    build: ./twitter_topic_mobility_prediction
+    volumes:
+      - ./twitter_topic_mobility_prediction
+#    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
