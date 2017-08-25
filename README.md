@@ -5,6 +5,15 @@
 - Train regression model to estimate mobile phone GPS point density from spatiotemporal tweets and topics from the tweets
 - Estimate grid-based population density
 
+## Research paper
+The paper is going to apper in Frontiers of Computer Science.
+
+    Satoshi Miyazawa, Xuan Song, Tianqi Xia, Ryosuke Shibasaki, and Hodaka Kaneda.
+    Integrating GPS trajectory and topics from Twitter stream for human mobility estimation. Frontiers of Computer Science.
+    (Accepted: 2017-04-13) DOI: 10.1007/s11704-017-6464-3
+
+PDF is coming soon.
+
 ## Files
 
 | File name     | Description                    |
