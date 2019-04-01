@@ -137,7 +137,11 @@ def raw_txy_to_index_txy_metric_new(aoi, timestart, timeend, unit_spatial, unit_
     # logger.info("X index: %s", x_index)
     # logger.info("Y index: %s", y_index)
     timestart = datetime.datetime.strptime(timestart, '%Y-%m-%d %H:%M:%S')
+
     t = datetime.datetime.strptime(t, '%Y-%m-%d %H:%M:%S')
+    # For 1h shift:
+    # t = datetime.datetime.strptime(t, '%Y-%m-%d %H:%M:%S') + datetime.timedelta(hours=3)
+
     t_index = int((t - timestart) / datetime.timedelta(minutes=unit_temporal))
     # x_index = int((x - aoi[0])/unit_spatial)
     # y_index = int((y - aoi[1])/unit_spatial)

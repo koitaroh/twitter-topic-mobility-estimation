@@ -55,7 +55,6 @@ if __name__ == '__main__':
     EXPERIMENT_NAME = s.EXPERIMENT_NAME
     NUM_TOPIC = s.NUM_TOPIC
 
-    ENGINE_CONF = s.ENGINE_CONF
     TABLE_NAME = s.TABLE_NAME
     tweet_df_name = s.TWEET_DF_NAME
     outdir = s.OUTDIR
@@ -69,17 +68,14 @@ if __name__ == '__main__':
 
     # Convert_gps_to_grid
     # Change function in gps_to_grid_metric depending on metric or degree
-    # st_units = convert_points_to_grid.define_spatiotemporal_unit_metric_new(aoi, timestart, timeend, unit_spatial, unit_temporal)
     st_units, x_unit_degree, y_unit_degree = convert_points_to_grid.define_spatiotemporal_unit_metric_new(aoi, timestart, timeend, unit_spatial, unit_temporal)
-
-    # convert_gps_to_grid.gps_to_grid_metric_people(aoi, timestart, timeend, unit_spatial, unit_temporal, st_units, gps_dir, gps_counter_file)
     convert_gps_to_grid.gps_to_grid_metric_people_new(aoi, timestart, timeend, unit_spatial, unit_temporal, st_units, x_unit_degree, y_unit_degree, gps_dir, gps_counter_file)
 
 
     # Convert_tweet_to_grid_and_gensim
     # Change function in gps_to_grid_metric depending on metric or degree
     st_units_topic, x_unit_degree, y_unit_degree = convert_points_to_grid.define_spatiotemporal_unit_topic_metric_new(aoi, timestart, timeend, unit_spatial, unit_temporal, NUM_TOPIC)
-    convert_tweet_to_grid_and_gensim.create_twitter_text_files_metric(ENGINE_CONF, TABLE_NAME, st_units, TWEET_COUNTER_FILE, aoi, timestart, timeend,
+    convert_tweet_to_grid_and_gensim.create_twitter_text_files_metric(TABLE_NAME, st_units, TWEET_COUNTER_FILE, aoi, timestart, timeend,
                                                                       tweet_df_name, outdir, unit_temporal, unit_spatial, x_unit_degree, y_unit_degree)
 
     # run_gensim_topicmodels
@@ -90,3 +86,4 @@ if __name__ == '__main__':
         run_regression.load_data(TWEET_COUNTER_FILE, gps_counter_file, LSI_counter_file, LDA_counter_file, NUM_TOPIC)
     run_regression.run_regression(tweet_counter_row, gps_counter_row, tweet_lsi_counter, tweet_lda_counter)
     run_regression.create_estimation(TWEET_COUNTER_FILE, LSI_counter_file, ESTIMATION_LSI_GB_FILE, tweet_lsi_counter, gps_counter_row)
+    logger.info('Done.')

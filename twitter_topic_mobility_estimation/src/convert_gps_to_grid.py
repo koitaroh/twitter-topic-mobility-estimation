@@ -110,7 +110,7 @@ def raw_txy_to_index_txy_metric_pandas(args):
 
 def gps_to_grid_metric_people_new(aoi, timestart, timeend, unit_spatial, unit_temporal, st_units, x_unit_degree, y_unit_degree, gps_dir, gps_counter_file):
     density = numpy.zeros(st_units, dtype=numpy.int)
-    os.makedirs(MODELS_DIR + "/GPS/")
+    if not os.path.exists(MODELS_DIR + "/GPS/"): os.makedirs(MODELS_DIR + "/GPS/")
     for root, dirs, files in os.walk(gps_dir):
         files.sort()
         filelist = files[0:120]
