@@ -12,7 +12,7 @@ import MeCab
 import sqlalchemy
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
-import plotly.plotly as py  # tools to communicate with Plotly's server
+# import plotly.plotly as py  # tools to communicate with Plotly's server
 from sklearn import datasets, linear_model, metrics, ensemble
 from sklearn.svm import SVR
 from sklearn.model_selection import GridSearchCV, cross_val_score

@@ -17,6 +17,7 @@ import sqlalchemy
 
 import convert_points_to_grid
 import settings as s
+import utility_database
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -32,13 +33,14 @@ logger.addHandler(ch)
 logger.info('Initializing %s', __name__)
 
 
-def create_twitter_text_files_metric(engine_conf, table, st_units, tweet_counter_file, aoi, timestart, timeend, tweet_df_name, outdir, unit_temporal, unit_spatial, x_unit_degree, y_unit_degree):
+def create_twitter_text_files_metric(table, st_units, tweet_counter_file, aoi, timestart, timeend, tweet_df_name, outdir, unit_temporal, unit_spatial, x_unit_degree, y_unit_degree):
     logger.debug('Loading tweets to dataframe.')
     density = numpy.zeros(st_units)
     # Loading tweets to dataframe
-    engine = sqlalchemy.create_engine(engine_conf, echo=False)
+    engine, conn, metadata = utility_database.establish_db_connection_mysql_twitter_ssh()
+    # engine = sqlalchemy.create_engine(engine_conf, echo=False)
     sql = "SELECT * FROM %s where (tweeted_at between '%s' and '%s') and (x BETWEEN %s and %s) and (y BETWEEN %s and %s) and (words != '')" %(table, timestart, timeend, aoi[0], aoi[2], aoi[1], aoi[3])
-    conn = engine.connect()
+    # conn = engine.connect()
     tweet_df = pandas.read_sql_query(sql, engine)
     # logger.debug('Applying indices.')
     # Applying indices

@@ -3,18 +3,23 @@ import os
 import pymysql
 import configparser
 import sqlalchemy
+from pathlib import Path
+from slackclient import SlackClient
 
 # Logging ver. 2016-07-12
 from logging import handlers
 import logging
 
+# Logging ver. 2017-12-14
+import logging
+from logging import handlers
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 fh = logging.handlers.RotatingFileHandler('log.log', maxBytes=1000000, backupCount=3)  # file handler
 fh.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()  # console handler
-ch.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+ch.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(lineno)d - [%(levelname)s][%(funcName)s] - %(message)s')
 ch.setFormatter(formatter)
 fh.setFormatter(formatter)
 logger.addHandler(fh)
@@ -22,25 +27,35 @@ logger.addHandler(ch)
 logger.info('Initializing %s', __name__)
 
 # Database configuration
-conf = configparser.ConfigParser()
-conf.read('config.cfg')
-REMOTE_DB = {
-    "host": conf.get('RDS', 'host'),
-    "user": conf.get('RDS', 'user'),
-    "passwd": conf.get('RDS', 'passwd'),
-    "db_name": conf.get('RDS', 'db_name'),
-}
-ENGINE_CONF = "mysql+pymysql://" + REMOTE_DB["user"] + ":" + REMOTE_DB["passwd"] + "@" + REMOTE_DB["host"] + "/" + \
-              REMOTE_DB["db_name"] + "?charset=utf8mb4"
-TABLE_NAME = "social_activity_201307_1"
+# conf = configparser.ConfigParser()
+# conf.read('config.cfg')
+# REMOTE_DB = {
+#     "host": conf.get('RDS', 'host'),
+#     "user": conf.get('RDS', 'user'),
+#     "passwd": conf.get('RDS', 'passwd'),
+#     "db_name": conf.get('RDS', 'db_name'),
+# }
+# ENGINE_CONF = "mysql+pymysql://" + REMOTE_DB["user"] + ":" + REMOTE_DB["passwd"] + "@" + REMOTE_DB["host"] + "/" + \
+#               REMOTE_DB["db_name"] + "?charset=utf8mb4"
+TABLE_NAME = "social_activity_201307"
+#
+# DATA_CONFIGURATION = {
+#     'ENGINE_CONF': "mysql+pymysql://" + REMOTE_DB["user"] + ":" + REMOTE_DB["passwd"] + "@" + REMOTE_DB["host"] + "/" + REMOTE_DB["db_name"] + "?charset=utf8mb4",
+#     'TABLE_NAME': "social_activity_201307_1"
+# }
 
-DATA_CONFIGURATION = {
-    'ENGINE_CONF': "mysql+pymysql://" + REMOTE_DB["user"] + ":" + REMOTE_DB["passwd"] + "@" + REMOTE_DB["host"] + "/" + REMOTE_DB["db_name"] + "?charset=utf8mb4",
-    'TABLE_NAME': "social_activity_201307_1"
-}
+
+# # Database configuration new
+conf = configparser.ConfigParser()
+src_dir = Path(__file__).parent.resolve()
+# print(f'Checking the new pathlib: {src_dir}')
+conf_file = src_dir / "config.cfg"
+conf.read(conf_file)
+SLACK_TOKEN = conf.get('Slack', 'token')
+sc = SlackClient(SLACK_TOKEN)
 
 # Experiment parameters
-EXPERIMENT_NAME = "Experiment_20170104_1549"
+EXPERIMENT_NAME = "Experiment_20190331_1807"
 TIMESTART = "2013-07-25 00:00:00"
 TIMEEND = "2013-07-31 23:59:59"
 TIMESTART_TEXT = TIMESTART[0:10]
@@ -55,7 +70,7 @@ NUM_TOPIC = 10
 SAMPLE_SIZE = 1000000
 
 EXPERIMENT_PARAMETERS = {
-    'EXPERIMENT_NAME': "Experiment_20170104_1549",
+    'EXPERIMENT_NAME': "Experiment_20190331_1238",
     'TIMESTART' : "2013-07-25 00:00:00",
     'TIMEEND' : "2013-07-31 23:59:59",
     'TIMESTART_TEXT' : TIMESTART[0:10],
@@ -66,7 +81,9 @@ EXPERIMENT_PARAMETERS = {
     'UNIT_SPATIAL_METER' : 1000,
     'NUM_TOPIC' : 10,
     # sample size (originally: 22571472)
-    'SAMPLE_SIZE' : 1000000
+    'SAMPLE_SIZE': 1000,
+    # 'SAMPLE_SIZE': 1000000,
+
 }
 
 # Experiment resource files
