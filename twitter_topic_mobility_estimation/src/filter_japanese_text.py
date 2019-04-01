@@ -1,14 +1,15 @@
-# Last Update: 2016-05-20
+# Last Update: 2019-03-31
 # @author: Satoshi Miyazawa
 # koitaroh@gmail.com
 
 # Applies simple text filter, then apply MeCab filter to break down text into words (separated by space)
 
 import MeCab
-MECAB_MODE = 'mecabrc'
+import nagisa
+MECAB_MODE = '-Ochasen'
 PARSE_TEXT_ENCODING = 'utf-8'
 
-# Logging ver. 2016-05-20
+# Logging ver. 2016-07-12
 from logging import handlers
 import logging
 logger = logging.getLogger(__name__)
@@ -22,7 +23,7 @@ ch.setFormatter(formatter)
 fh.setFormatter(formatter)
 logger.addHandler(fh)
 logger.addHandler(ch)
-logger.info('Initializing.')
+logger.info('Initializing %s', __name__)
 
 
 def text_filter(text):
@@ -39,7 +40,7 @@ def text_filter(text):
             if text[0] == " ":
                 text = text.lstrip(' ')
         # Delete tweets start with "I'm at ".
-        if text[0:7] == "I'm at ":
+        if (text[0:7] == "I'm at ") or (text[0:7] == "I m at "):
             text = ""
             return text
         # "#tag"を削除
@@ -57,12 +58,15 @@ def text_filter(text):
         text = text.replace('\n','') # Get rid of return
         text = text.replace('\r','') # Get rid of return
         text = text.replace("\"",' ') # Get rid of return
+        text = text.replace("\(", ' ')  # Get rid of return
+        text = text.replace("\)", ' ')  # Get rid of return
         text = text.replace("\'",' ') # Get rid of return
         text = text.replace("\\",' ') # Get rid of return
         text = text.rstrip()
     except IndexError:
-        pass
+        text = ""
     return text
+
 
 def mecab_parse(text):
     tagger = MeCab.Tagger(MECAB_MODE)
@@ -103,20 +107,48 @@ def dict_to_space_text_words(words_dict):
     return words
 
 
-def filter_japanese_text(text):
+def list_to_space_text_words(words_list):
+    words = " ".join(words_list)
+    words = words.replace(',', ' ')
+    return words
+
+
+def filter_japanese_text_mecab(text):
+    print(text)
     tweet_text = text_filter(text)
+    print(tweet_text)
     words_dict = mecab_parse(tweet_text)
+    print(words_dict)
     words = dict_to_space_text_words(words_dict)
     return words
 
+
+def filter_japanese_text_nagisa(text):
+    words = nagisa.tagging(text)
+    words = " ".join(words.words)
+    return words
+
 if __name__ == '__main__':
-    test_tweet = "RT @koitaroh: 本文が抽出できるかテストをします。"
+    test_tweet = "本文が抽出できるかテストをします"
+    # test_tweet = "@y1r16k微熱治ったけど喉が治らん(´･･｀)アンパンマンの顔作って～(笑)"
+    # test_tweet = "I m at 沼袋駅 (Numabukuro Sta.) (中野区, 東京都)"
     # test_tweet = "RT @test: I'm at アミューズメントパークエルロフト - @l_loft in 茨木市, 大阪府 https://t.co/Bgm813Qamu"
-    logger.debug("Testing sample text: %s", test_tweet)
-    tweet_text = text_filter(test_tweet)
-    logger.debug(tweet_text)
-    words_dict = mecab_parse(tweet_text)
-    words = dict_to_space_text_words(words_dict)
-    logger.debug("Result run separately: %s", words)
-    words2 = filter_japanese_text(test_tweet)
-    logger.debug("Result run as one: %s", words2)
+    # print(test_tweet)
+    # tweet_text = text_filter(test_tweet)
+    # print(tweet_text)
+    # # words_dict = mecab_parse(tweet_text)
+    # # words = dict_to_space_text_words(words_dict)
+    # # logger.debug("Result run separately: %s", words)
+    # # words2 = filter_japanese_text(test_tweet)
+    # # logger.debug("Result run as one: %s", words2)
+    #
+    # words_list = jumanpp_parse(tweet_text)
+    # print(words_list)
+    # words = list_to_space_text_words(words_list)
+    # print(words)
+
+    # words2 = filter_japanese_text(test_tweet)
+    # print(words2)
+
+    words2 = filter_japanese_text_nagisa(test_tweet)
+    print(words2)

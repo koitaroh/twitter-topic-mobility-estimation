@@ -1,54 +1,62 @@
-# Last Update: 2016-07-27
+# Last Update: 2017-08-04
 # @author: Satoshi Miyazawa
 # koitaroh@gmail.com
 # Specify a table on a database. Apply filter_japanese_text.py on corresponding column.
 
 import pymysql
 import sqlalchemy
-from filter_japanese_text import filter_japanese_text
-import settings as s
 
-# Logging ver. 2016-07-12
-from logging import handlers
+# Logging ver. 2017-12-14
 import logging
+from logging import handlers
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 fh = logging.handlers.RotatingFileHandler('log.log', maxBytes=1000000, backupCount=3)  # file handler
 fh.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()  # console handler
-ch.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+ch.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(lineno)d - [%(levelname)s][%(funcName)s] - %(message)s')
 ch.setFormatter(formatter)
 fh.setFormatter(formatter)
 logger.addHandler(fh)
 logger.addHandler(ch)
 logger.info('Initializing %s', __name__)
 
+from filter_japanese_text import filter_japanese_text_nagisa
+# import settings as s
+import utility_database
 
-def prepare_tweet_db(engine_conf, in_table):
-    engine = sqlalchemy.create_engine(engine_conf, echo=False)
-    conn = engine.connect()
-    metadata = sqlalchemy.MetaData(engine)
-    table = sqlalchemy.Table(in_table, metadata, autoload=True, autoload_with=engine)
-    s = sqlalchemy.select([table.c.id, table.c.text]).where(table.c.text != None)
+
+def prepare_tweet_db(table_name, engine, conn, metadata):
+    table = sqlalchemy.Table(table_name, metadata, autoload=True, autoload_with=engine)
+    s = sqlalchemy.select([table.c.id, table.c.text]).where(table.c.x != None).where(table.c.text != None).where(table.c.lang == "ja")
+    # s = sqlalchemy.select([table.c.id, table.c.text]).where(table.c.x != None).where(table.c.text != None).where(table.c.lang == "en")
     result = conn.execute(s)
     for row in result.fetchall():
         id = row['id']
         text = row['text']
-        words = filter_japanese_text(text)
+        try:
+            words = filter_japanese_text_nagisa(text)
+        except Exception as err:
+            logger.error(err)
+            words = ""
+            pass
         logger.debug(words)
         stmt = table.update().where(table.c.id == id).values(words=words)
         conn.execute(stmt)
     result.close()
-    return True
+    return None
+
 
 if __name__ == '__main__':
-    engine_conf = s.ENGINE_CONF
-    table_name = s.TABLE_NAME
-    test1 = "帰るよー (@ 渋谷駅 (Shibuya Sta.) in 渋谷区, 東京都) https://t.co/UwXP9Gr0wJ check this out (http://t.co/nYHbleBtBT)"
-    test2 = "終電変わらず(｀・ω・´)ゞ @ 川崎駅にタッチ！ http://t.co/DJFKEEUW3n"
-    test3 = "月ザンギョ100とか200とかそら死ぬわな、と実感しつつある。 (@ ノロワレハウス II in 杉並区, 東京都) https://t.co/BkcI7uNigi"
-    # prepare_tweet_db(engine_conf, "tweet_table_201501_test")
-    prepare_tweet_db(engine_conf, table_name)
+    # TABLE_NAME = "tweet_table_201207"
+    TABLE_NAME = "tweet_table_201708"
+    engine, conn, metadata = utility_database.establish_db_connection_mysql_twitter_ssh()
+
+    # test1 = "帰るよー (@ 渋谷駅 (Shibuya Sta.) in 渋谷区, 東京都) https://t.co/UwXP9Gr0wJ check this out (http://t.co/nYHbleBtBT)"
+    # test2 = "終電変わらず(｀・ω・´)ゞ @ 川崎駅にタッチ！ http://t.co/DJFKEEUW3n"
+    # test3 = "月ザンギョ100とか200とかそら死ぬわな、と実感しつつある。 (@ ノロワレハウス II in 杉並区, 東京都) https://t.co/BkcI7uNigi"
+
+    prepare_tweet_db(TABLE_NAME, engine, conn, metadata)
 
 
